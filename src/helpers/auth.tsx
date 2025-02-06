@@ -9,23 +9,25 @@ export const checkAuth = (authHeader?: string | null) => {
   }
   const token = authHeader.substring(7); // Remove 'Bearer ' prefix
 
-  const userId = decodeTokenAndGetUserId(token);
+  const user = decodeTokenAndGetUserId(token);
 
-  if (!userId) {
+  if (!user) {
     return NextResponse.json({ error: "Invalid token" }, { status: 401 });
   }
 
-  if (!userId) {
+  if (!user.userId) {
     return NextResponse.json({ error: "User ID is required" }, { status: 400 });
   }
 
-  return { userId };
+  return { userId: user.userId, role: user.role };
 };
 
-function decodeTokenAndGetUserId(token: string): string | null {
+export function decodeTokenAndGetUserId(
+  token: string
+): { userId: string; role: string } | null {
   try {
     const decoded = JSON.parse(atob(token.split(".")[1]));
-    return decoded.userId || null;
+    return { userId: decoded.userId, role: decoded.role };
   } catch (error) {
     console.error("Error decoding token:", error);
     return null;

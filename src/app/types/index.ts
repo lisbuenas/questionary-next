@@ -7,7 +7,14 @@ export interface User {
     id: string;
     username: string;
     role: string;
+    userQuestionaries: any[];
 }
+
+export type Questionnaire = {
+    id: string;
+    name: string;
+    userQuestionnaire: any[];
+};
 
 
 export interface QuestionOption {

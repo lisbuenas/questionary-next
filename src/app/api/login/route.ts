@@ -1,16 +1,23 @@
 import { NextResponse } from "next/server";
 import jwt from "jsonwebtoken";
+import { PrismaClient } from "@prisma/client";
 
-
-const users = [
-    { username: "admin", password: "admin123", role: "admin", userId: 1 },
-    { username: "user", password: "user123", role: "user", userId: 2 },
-    { username: "user2", password: "user123", role: "user", userId: 3 },
-];
+const prisma = new PrismaClient();
 
 export async function POST(req: Request) {
     const { username, password } = await req.json();
-    const user = users.find((u) => u.username === username && u.password === password);
+
+    async function login(username: string, password: string) {
+
+        return prisma.user.findUnique({
+            where: {
+                username,
+                password,
+            },
+        });
+    }
+
+    const user = await login(username, password);
 
     if (!user) {
         return NextResponse.json({ error: "Invalid credentials" }, { status: 401 });
@@ -21,8 +28,8 @@ export async function POST(req: Request) {
     }
 
     const token = jwt.sign(
-        { username: "admin", role: user.role, userId: user.userId },
-        process.env.JWT_SECRET, // Store JWT secret in .env file
+        { username: "admin", role: user.role, userId: user.id },
+        process.env.JWT_SECRET,
         { expiresIn: "1h" }
     );
 

@@ -6,17 +6,14 @@ import { useRouter } from "next/navigation";
 import { Loader2 } from "lucide-react";
 import useAuthProtection from "@/hooks/useAuthProtection";
 import Header from "@/components/custom/Header";
-
-export type Questionnaire = {
-  id: string;
-  name: string;
-};
+import { getAuthToken } from "@/helpers/auth";
+import { Questionnaire } from "../types";
+import { Check } from "lucide-react";
 
 export default function QuestionarySelection() {
   const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [questionnaires, setQuestionaries] = useState<Questionnaire[]>([]);
-
   const { loadingAuth, isAuthenticated } = useAuthProtection();
 
   useEffect(() => {
@@ -24,7 +21,11 @@ export default function QuestionarySelection() {
       try {
         setLoading(true);
 
-        const response = await fetch(`/api/questionnaires`);
+        const response = await fetch(`/api/questionnaires`, {
+          headers: {
+            Authorization: `Bearer ${getAuthToken()}`,
+          },
+        });
         const data = await response.json();
         setQuestionaries(data.questionnaires);
 
@@ -37,20 +38,21 @@ export default function QuestionarySelection() {
     };
 
     fetchQuestionnaireData();
-  }, []);
+  }, [loadingAuth]);
 
   if (loadingAuth) {
-    return <div>Loading...</div>; // You can replace this with a loading spinner or skeleton
+    return <div>Loading...</div>;
   }
 
   if (!isAuthenticated) {
-    return null; // The page won't render if not authenticated (the user is already redirected)
+    return null;
   }
 
   const handleSelectQuestionnaire = (link: string) => {
     router.push("/questionary-selection/" + link);
   };
 
+  console.log({ loading });
   return (
     <>
       <Header />
@@ -71,6 +73,15 @@ export default function QuestionarySelection() {
                   <CardTitle>{questionnaire.name}</CardTitle>
                 </CardHeader>
                 <CardContent>
+                  <div className="h-12">
+                    {questionnaire?.userQuestionnaire &&
+                      questionnaire.userQuestionnaire.length > 0 && (
+                        <>
+                          <span className="float-left">Answered</span>
+                          <Check size={24} color="green" />
+                        </>
+                      )}
+                  </div>
                   <Button
                     onClick={() => handleSelectQuestionnaire(questionnaire.id)}
                   >

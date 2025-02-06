@@ -1,17 +1,41 @@
+import { checkAuth } from '@/helpers/auth';
 import { PrismaClient } from '@prisma/client';
 import { NextResponse } from "next/server";
 
 
 const prisma = new PrismaClient();
 
-export async function GET(req: Request) {
+interface RequestParams {
+    params: Promise<{
+        id: string;
+    }>;
+}
 
-    console.log("GET /api/questionnaires");
 
-    console.log("req", req);
+export async function GET(request: Request, props: RequestParams) {
+    const authHeader = request.headers.get('authorization');
+    const authResult = checkAuth(authHeader);
+    if (authResult instanceof NextResponse) {
+        return authResult;
+    }
+
+    const { userId } = authResult;
     const questionnaires = await prisma.questionnaire.findMany();
-    //  res.status(200).json(questionnaires);
 
-    return NextResponse.json({ questionnaires });
+
+    const userQuestionnaires = await Promise.all(
+        questionnaires.map(async (questionnaire) => {
+            const userQuestionnaire = await prisma.userQuestionnaire.findMany({
+                where: {
+                    userId: parseInt(userId),
+
+                    questionnaireId: questionnaire.id
+                }
+            });
+            return { ...questionnaire, userQuestionnaire };
+        })
+    );
+
+    return NextResponse.json({ questionnaires: userQuestionnaires });
 }
 

@@ -3,13 +3,21 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useParams } from "next/navigation";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/custom/Header";
 import useAuthProtection from "@/hooks/useAuthProtection";
 import { Question, FormData, QuestionData } from "../../types";
+import { Loader2 } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+
 import { getAuthToken } from "@/helpers/auth";
+import QuestionarieForm from "@/components/custom/QuestionnarieForm";
 
 const QuestionnairePage: React.FC = () => {
   const router = useRouter();
@@ -18,6 +26,7 @@ const QuestionnairePage: React.FC = () => {
   const [questions, setQuestions] = useState<QuestionData[]>([]);
   const [formData, setFormData] = useState<FormData>();
   const [loading, setLoading] = useState(true);
+  const [loadingSubmit, setLoadingSubmit] = useState(false);
 
   const { loadingAuth, isAuthenticated } = useAuthProtection();
 
@@ -35,14 +44,6 @@ const QuestionnairePage: React.FC = () => {
         const data = await response.json();
         setQuestions(data.questions);
 
-        const initialFormData = data.questions.reduce(
-          (acc: { [key: string]: string | string[] }, question: Question) => {
-            acc[question.id] = question.type === "mcq" ? [] : ""; // default for multiple choice is an empty array
-            return acc;
-          },
-          {}
-        );
-
         const answersResponse = await fetch(`/api/answers/${questionnaireId}`, {
           headers: {
             Authorization: `Bearer ${getAuthToken()}`,
@@ -50,9 +51,6 @@ const QuestionnairePage: React.FC = () => {
         });
 
         const answersData = await answersResponse.json();
-
-        console.log({ answersData });
-
         const currentDataObject = answersData.reduce(
           (
             acc: { [key: string]: string | string[] },
@@ -64,7 +62,6 @@ const QuestionnairePage: React.FC = () => {
           {}
         );
 
-        console.log({ initialFormData });
         setFormData(currentDataObject);
       } catch (error) {
         console.error("Error fetching questionnaire data:", error);
@@ -77,14 +74,13 @@ const QuestionnairePage: React.FC = () => {
   }, [questionnaireId]);
 
   if (loadingAuth) {
-    return <div>Loading...</div>; // You can replace this with a loading spinner or skeleton
+    return <div>Loading...</div>;
   }
 
   if (!isAuthenticated) {
-    return null; // The page won't render if not authenticated (the user is already redirected)
+    return null;
   }
 
-  // Handle form input change
   const handleInputChange = (id: string, value: string) => {
     setFormData((prevData) => ({
       ...prevData,
@@ -109,7 +105,7 @@ const QuestionnairePage: React.FC = () => {
           ...prevData,
           [id]: Array.isArray(updatedValue)
             ? updatedValue.filter((value: string) => value !== option)
-            : [], // Remove unselected option
+            : [],
         };
       }
     });
@@ -130,11 +126,11 @@ const QuestionnairePage: React.FC = () => {
     }
   };
 
-  // Placeholder function to submit the form
   const submitQuestionnaire = async (
     questionnaireId: string,
     data: FormData
   ) => {
+    setLoadingSubmit(true);
     const response = await fetch(`/api/answers/${questionnaireId}`, {
       method: "PUT",
       headers: {
@@ -143,14 +139,12 @@ const QuestionnairePage: React.FC = () => {
       },
       body: JSON.stringify(data),
     });
+    setLoadingSubmit(false);
+
     if (!response.ok) {
       throw new Error("Failed to submit questionnaire");
     }
   };
-
-  if (loading) {
-    return <div>Loading...</div>;
-  }
 
   return (
     <>
@@ -163,57 +157,37 @@ const QuestionnairePage: React.FC = () => {
           </Button>
         </header>
 
+        {loading && (
+          <div className="flex justify-center items-center">
+            <Loader2 className="animate-spin h-8 w-8 text-gray-600" />
+          </div>
+        )}
+
+        <Dialog open={loadingSubmit}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Submiting the answers</DialogTitle>
+              <DialogDescription></DialogDescription>
+            </DialogHeader>
+
+            <div className="flex justify-center space-x-4">
+              <Loader2 className="animate-spin h-5 w-5 mr-2" />
+            </div>
+          </DialogContent>
+        </Dialog>
+
         <form onSubmit={handleSubmit} className="space-y-8">
-          {questions.map((questionData: QuestionData) => {
-            console.log({ questionData });
-            let obj;
-            try {
-              obj = questionData?.question
-                ? JSON.parse(questionData.question.question)
-                : {};
-            } catch (error) {
-              console.error("Invalid JSON:", error);
-              obj = null;
-            }
-            return (
-              <div key={questionData.id} className="space-y-4">
-                <label className="block font-semibold">{obj.question}</label>
-
-                {obj.type === "input" ? (
-                  <Input
-                    value={formData?.[questionData.id] ?? ""}
-                    onChange={(e) =>
-                      handleInputChange(questionData.id, e.target.value)
-                    }
-                    placeholder={`Enter ${obj.question}`}
-                  />
-                ) : (
-                  <div className="space-y-2">
-                    {obj.options?.map((option: string, index: number) => (
-                      <div key={index} className="flex items-center space-x-3">
-                        <Checkbox
-                          checked={
-                            formData?.[questionData.id]?.includes(option) ||
-                            false
-                          }
-                          onCheckedChange={(e: boolean) => {
-                            console.log("Clicked!!");
-                            console.log(e);
-
-                            handleCheckboxChange(questionData.id, option, e);
-                          }}
-                        />
-                        <label>{option}</label>
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          })}
+          <QuestionarieForm
+            questions={questions}
+            formData={formData as any}
+            handleInputChange={handleInputChange}
+            handleCheckboxChange={handleCheckboxChange}
+          />
 
           <div className="flex justify-end">
-            <Button type="submit">Submit Questionnaire</Button>
+            <Button disabled={loading} type="submit">
+              Submit Questionnaire
+            </Button>
           </div>
         </form>
       </div>

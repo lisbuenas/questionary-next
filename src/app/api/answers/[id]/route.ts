@@ -5,14 +5,15 @@ import { NextResponse } from "next/server";
 const prisma = new PrismaClient();
 
 interface RequestParams {
-    params: {
+    params: Promise<{
         id: string;
-    };
+    }>;
 }
 
-export async function PUT(request: Request, { params }: RequestParams) {
+export async function PUT(request: Request, props: RequestParams) {
+    const params = await props.params;
     const data = await request.json();
-    const id = params?.id; // this is what will grab the string - use an UUID
+    const id = params?.id;
     const authHeader = request.headers.get('authorization');
 
     const authResult = checkAuth(authHeader);
@@ -21,7 +22,6 @@ export async function PUT(request: Request, { params }: RequestParams) {
     }
 
     const { userId } = authResult;
-
 
     const answers: { questionId: number; answer: string; userId: number; questionnaireId: number }[] = Object.entries(data).map(
         ([questionId, answer]) => ({
@@ -69,8 +69,9 @@ export async function PUT(request: Request, { params }: RequestParams) {
 }
 
 
-export async function GET(request: Request, { params }: RequestParams) {
-    const id = params?.id; // this is what will grab the string - use an UUID
+export async function GET(request: Request, props: RequestParams) {
+    const params = await props.params;
+    const id = params?.id;
 
     const authHeader = request.headers.get('authorization');
 
@@ -82,7 +83,8 @@ export async function GET(request: Request, { params }: RequestParams) {
 
     const answers = await prisma.answer.findMany({
         where: {
-            questionnaireId: parseInt(id)
+            questionnaireId: parseInt(id),
+            userId: parseInt(authResult.userId)
         }
     });
 
