@@ -5,14 +5,8 @@ import { NextResponse } from "next/server";
 
 const prisma = new PrismaClient();
 
-interface RequestParams {
-    params: Promise<{
-        id: string;
-    }>;
-}
 
-
-export async function GET(request: Request, props: RequestParams) {
+export async function GET(request: Request) {
     const authHeader = request.headers.get('authorization');
     const authResult = checkAuth(authHeader);
     if (authResult instanceof NextResponse) {
@@ -21,7 +15,6 @@ export async function GET(request: Request, props: RequestParams) {
 
     const { userId } = authResult;
     const questionnaires = await prisma.questionnaire.findMany();
-
 
     const userQuestionnaires = await Promise.all(
         questionnaires.map(async (questionnaire) => {

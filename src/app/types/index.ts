@@ -36,7 +36,6 @@ export type FormData = {
 
 export interface QuestionData {
     id: string;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     question: any;
     questionId: number;
     questionnaireId: number;

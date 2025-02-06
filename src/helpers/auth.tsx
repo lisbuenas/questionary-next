@@ -24,10 +24,14 @@ export const checkAuth = (authHeader?: string | null) => {
 
 export function decodeTokenAndGetUserId(
   token: string
-): { userId: string; role: string } | null {
+): { userId: string; role: string; username: string } | null {
   try {
     const decoded = JSON.parse(atob(token.split(".")[1]));
-    return { userId: decoded.userId, role: decoded.role };
+    return {
+      userId: decoded.userId,
+      role: decoded.role,
+      username: decoded.username,
+    };
   } catch (error) {
     console.error("Error decoding token:", error);
     return null;

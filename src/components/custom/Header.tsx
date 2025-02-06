@@ -18,12 +18,15 @@ const Header: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [userRole, setUserRole] = useState<string | undefined>("");
 
+  const [username, setUsername] = useState<string | undefined>("");
+
   useEffect(() => {
     const token = getAuthToken();
     if (token) {
       const authResult = decodeTokenAndGetUserId(token);
       const user = authResult;
-      console.log({ user });
+
+      setUsername(user?.username);
       setUserRole(user?.role);
     } else {
       console.error("No auth token found");
@@ -49,7 +52,7 @@ const Header: React.FC = () => {
       <header className="pl-2 bg-gray-800 text-white py-4 pr-2">
         <div className="container mx-auto flex justify-between items-center">
           <Link href="/questionary-selection">
-            <h1 className="text-xl font-semibold">Question APP</h1>
+            <h1 className="text-xl font-semibold">Question APP - {username}</h1>
           </Link>
 
           <div className="flex space-x-6"></div>

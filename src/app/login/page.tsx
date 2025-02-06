@@ -26,8 +26,6 @@ export default function LoginPage() {
     // Store the token in localStorage
     localStorage.setItem("auth_token", data.token);
 
-    console.log("Login response:", data);
-
     if (!res.ok) {
       setError("Invalid credentials. Try again.");
       return;

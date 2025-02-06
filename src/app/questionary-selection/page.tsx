@@ -28,8 +28,6 @@ export default function QuestionarySelection() {
         });
         const data = await response.json();
         setQuestionaries(data.questionnaires);
-
-        console.log("Fetched questionnaire data:", data);
       } catch (error) {
         console.error("Error fetching questionnaire data:", error);
       } finally {
@@ -52,7 +50,6 @@ export default function QuestionarySelection() {
     router.push("/questionary-selection/" + link);
   };
 
-  console.log({ loading });
   return (
     <>
       <Header />

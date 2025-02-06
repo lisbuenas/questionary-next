@@ -6,7 +6,8 @@ import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Header from "@/components/custom/Header";
 import useAuthProtection from "@/hooks/useAuthProtection";
-import { Question, FormData, QuestionData } from "../../types";
+import { FormData, QuestionData } from "../../types";
+
 import { Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -18,8 +19,11 @@ import {
 
 import { getAuthToken } from "@/helpers/auth";
 import QuestionarieForm from "@/components/custom/QuestionnarieForm";
+import { useToast } from "@/hooks/use-toast";
+import { ToastAction } from "@/components/ui/toast";
 
 const QuestionnairePage: React.FC = () => {
+  const { toast } = useToast();
   const router = useRouter();
   const params = useParams();
   const questionnaireId = params?.id as string;
@@ -113,14 +117,13 @@ const QuestionnairePage: React.FC = () => {
 
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault();
-    console.log("Form data:", formData);
     try {
       if (formData) {
         await submitQuestionnaire(questionnaireId, formData);
       } else {
         console.error("Form data is undefined");
       }
-      router.push("/questionary-selection");
+      //router.push("/questionary-selection");
     } catch (error) {
       console.error("Submission error:", error);
     }
@@ -142,6 +145,16 @@ const QuestionnairePage: React.FC = () => {
     setLoadingSubmit(false);
 
     if (!response.ok) {
+      const errorMessage: any = await response.text();
+      const { error } = JSON.parse(errorMessage);
+
+      toast({
+        title: "Error",
+        description: error,
+        variant: "destructive",
+        action: <ToastAction altText="Ok">Ok</ToastAction>,
+      });
+
       throw new Error("Failed to submit questionnaire");
     }
   };

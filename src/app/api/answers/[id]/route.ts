@@ -32,8 +32,19 @@ export async function PUT(request: Request, props: RequestParams) {
         })
     );
 
-    const createdAnswers = answers.filter(answer => answer != null); // Filter out any null or undefined answers
 
+    const allNonEmpty = Object.values(data).every(value => {
+        if (typeof value === 'string' || Array.isArray(value)) {
+            return value.length > 0;
+        }
+        return false;
+    });
+
+    if (!allNonEmpty) {
+        return NextResponse.json({ error: 'Empty responses are not allowed' }, { status: 400 });
+    }
+
+    const createdAnswers = answers.filter(answer => answer != null && answer.answer.trim() !== ''); // Filter out any null, undefined, or empty answers
     for (const answer of createdAnswers) {
         await prisma.answer.upsert({
             where: {
