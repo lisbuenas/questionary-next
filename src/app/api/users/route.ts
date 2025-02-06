@@ -4,6 +4,13 @@ import { PrismaClient } from '@prisma/client';
 
 const prisma = new PrismaClient();
 
+// Prisma middleware to close the database connection
+prisma.$use(async (params, next) => {
+    const result = await next(params);
+    await prisma.$disconnect(); // Ensure connection is disconnected after each query
+    return result;
+});
+
 
 export async function GET(req: Request) {
 
