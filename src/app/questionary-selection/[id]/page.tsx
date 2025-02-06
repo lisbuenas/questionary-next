@@ -123,7 +123,7 @@ const QuestionnairePage: React.FC = () => {
       } else {
         console.error("Form data is undefined");
       }
-      //router.push("/questionary-selection");
+      router.push("/questionary-selection");
     } catch (error) {
       console.error("Submission error:", error);
     }
