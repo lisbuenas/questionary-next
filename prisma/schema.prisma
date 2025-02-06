@@ -1,0 +1,73 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id       Int    @id @default(autoincrement())
+  username String @unique
+  password String
+  role     String  // 'user' or 'admin'
+  answers  Answer[]
+
+  userQuestionnaire UserQuestionnaire[]
+}
+
+model Questionnaire {
+  id    Int    @id @default(autoincrement())
+  name String
+  questions QuestionnaireJunction[]
+  userQuestionnaires UserQuestionnaire[]
+}
+
+model Question {
+  id       Int    @id @default(autoincrement())
+  question     String
+ // type     String // 'text', 'multiple-choice'
+  junction QuestionnaireJunction[]
+  Answer Answer[]
+}
+
+model QuestionnaireJunction {
+  id              Int    @id @default(autoincrement())
+  questionnaireId Int
+  questionId      Int
+  priority        Int
+  questionnaire   Questionnaire @relation(fields: [questionnaireId], references: [id])
+  question       Question @relation(fields: [questionId], references: [id])
+}
+
+
+model Answer {
+  id        Int    @id @default(autoincrement())
+  userId    Int
+  questionId Int
+  questionnaireId Int?
+  answer    String
+  user      User  @relation(fields: [userId], references: [id])
+  question  Question @relation(fields: [questionId], references: [id])
+
+  @@unique([userId, questionId, questionnaireId]) // Add a unique constraint for these fields
+
+}
+
+
+model UserQuestionnaire {
+  id              Int    @id @default(autoincrement())
+  userId          Int
+  questionnaireId Int
+  user            User          @relation(fields: [userId], references: [id])
+  questionnaire   Questionnaire @relation(fields: [questionnaireId], references: [id])
+
+  @@unique([userId, questionnaireId]) // Add a unique constraint for these fields
+}

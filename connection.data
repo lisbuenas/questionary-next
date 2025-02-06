@@ -1,0 +1,20 @@
+
+questionary123
+
+
+Project keys
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmZXd1Y2VxYnlxYm1tYmNpYnduIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Mzg3NTk4ODEsImV4cCI6MjA1NDMzNTg4MX0.wq2D02V5CLwCATgKs8RRISxHnONuol_sxlSYKzib3lc
+
+Service Role
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhmZXd1Y2VxYnlxYm1tYmNpYnduIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTczODc1OTg4MSwiZXhwIjoyMDU0MzM1ODgxfQ.sqoiQv_iMVJYrw-i5GcvUG-t3GEOxy6F7UAf0WM2mrY
+
+
+Project configuration
+https://xfewuceqbyqbmmbcibwn.supabase.co
+
+JWT Secret
+sU20clIhfXjEMYRKDRz4QOXhH79QBUZdxuJ1/NAUSuB13cTQzKgbisuvW1mfNFncq5GWuII5OvBnY5AgKP9LHQ==
+
+
+
+postgresql://postgres:[YOUR-PASSWORD]@db.xfewuceqbyqbmmbcibwn.supabase.co:5432/postgres
