@@ -135,7 +135,7 @@ const AdminPage: React.FC = () => {
                     {user.userQuestionaries.map((data) => (
                       <div
                         onClick={async () => {
-                          getQuestionaryFromUser(user.id, data.id);
+                          getQuestionaryFromUser(user.id, data.questionnaireId);
                           setCurrentQuestionnaire({
                             username: user.username,
                             questionaryName: data.questionnaire.name,
@@ -165,7 +165,6 @@ const AdminPage: React.FC = () => {
                 {currentQuestionnaire?.questionaryName}
               </DialogDescription>
             </DialogHeader>
-
             {loadingQuestions && (
               <div className="flex justify-center space-x-4">
                 <Loader2 className="animate-spin h-5 w-5 mr-2" />
@@ -178,21 +177,11 @@ const AdminPage: React.FC = () => {
                 formData={formData as any}
                 readonly={true}
                 handleInputChange={() => {}}
-                handleCheckboxChange={() => {}} //  setQuestionnarieModal={setQuestionnarieModal}
+                handleCheckboxChange={() => {}}
               />
             )}
           </DialogContent>
         </Dialog>
-
-        {questionnarieModal && (
-          <QuestionarieForm
-            questions={questions}
-            formData={formData as any}
-            readonly={true}
-            handleInputChange={() => {}}
-            handleCheckboxChange={() => {}} //  setQuestionnarieModal={setQuestionnarieModal}
-          />
-        )}
       </div>
     </div>
   );
